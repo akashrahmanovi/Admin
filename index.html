@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Portal - Mosque Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #e4ebf5; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; }
+        .main-title { text-align: center; margin-bottom: 20px; }
+        .main-title h1 { font-size: 24px; color: #333; font-weight: 700; }
+        .main-title h1 span { color: #e67e22; }
+        .container { width: 750px; max-width: 95vw; position: relative; display: flex; gap: 20px; align-items: flex-start; }
+        
+        /* Side Menu Styles */
+        .side-menu { width: 220px; background: #e4ebf5; padding: 20px 15px; border-radius: 20px; box-shadow: 8px 8px 16px #c5d9e8, -8px -8px 16px #ffffff; display: none; flex-direction: column; gap: 10px; }
+        .side-menu button { width: 100%; text-align: left; padding: 10px 12px; background: #e4ebf5; border: none; outline: none; border-radius: 10px; box-shadow: 4px 4px 8px #c5d9e8, -4px -4px 8px #ffffff; color: #444; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
+        .side-menu button:active, .side-menu button.active { box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; color: #e67e22; }
+        .side-menu button i { width: 16px; color: #e67e22; }
+
+        .superadmin-card { flex: 1; background: #e4ebf5; padding: 30px 25px; border-radius: 25px; box-shadow: 8px 8px 16px #c5d9e8, -8px -8px 16px #ffffff; }
+        .card-icon { width: 55px; height: 55px; background: #e4ebf5; margin: 0 auto 15px auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 5px 5px 10px #c5d9e8, -5px -5px 10px #ffffff; color: #e67e22; font-size: 20px; }
+        .card-header { text-align: center; margin-bottom: 20px; }
+        .card-header h2 { font-size: 20px; color: #333; font-weight: 700; }
+        .card-header p { font-size: 12px; color: #777; margin-top: 4px; }
+        .input-group { margin-bottom: 15px; position: relative; }
+        .input-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; }
+        .input-field { position: relative; display: flex; align-items: center; }
+        .input-field i { position: absolute; left: 15px; color: #777; font-size: 14px; }
+        .input-field input, .input-field select, .input-field textarea { width: 100%; padding: 12px 15px 12px 42px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 14px; color: #333; }
+        .btn-submit { width: 100%; padding: 12px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: 5px 5px 10px #c5d9e8, -5px -5px 10px #ffffff; color: #e67e22; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s ease; }
+        .btn-submit:active { box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; }
+        .profile-info { background: #e4ebf5; padding: 15px; border-radius: 15px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .table-container { max-height: 300px; overflow-y: auto; margin-bottom: 15px; border-radius: 12px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; padding: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; }
+        th, td { padding: 8px; color: #444; vertical-align: middle; }
+        th { border-bottom: 2px solid #d0dbe8; color: #e67e22; }
+        td { border-bottom: 1px solid #e1ebf7; }
+        .action-btn-sm { padding: 5px 10px; border: none; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; box-shadow: 2px 2px 4px #c5d9e8, -2px -2px 4px #ffffff; }
+        .action-btn-sm.approve { background: #27ae60; color: #fff; }
+        .action-btn-sm.delete { background: #e74c3c; color: #fff; }
+        .action-btn-sm.edit { background: #0066ff; color: #fff; }
+        .action-btn-sm.view { background: #8e44ad; color: #fff; }
+
+        /* Three-dot Menu Styles */
+        .dropdown { position: relative; display: inline-block; }
+        .dropbtn { background: #e4ebf5; border: none; width: 30px; height: 30px; border-radius: 50%; box-shadow: 2px 2px 5px #c5d9e8, -2px -2px 5px #ffffff; cursor: pointer; color: #555; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        .dropdown-content { display: none; position: absolute; right: 0; background-color: #e4ebf5; min-width: 130px; box-shadow: 5px 5px 10px #c5d9e8, -5px -5px 10px #ffffff; z-index: 10; border-radius: 10px; overflow: hidden; padding: 5px; }
+        .dropdown-content button { width: 100%; text-align: left; background: none; border: none; padding: 8px 10px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; margin-bottom: 2px; }
+        .dropdown-content button:hover { background: #d0dbe8; }
+        .show { display: block; }
+
+        .dashboard-box { background: #e4ebf5; border-radius: 20px; padding: 20px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; margin-bottom: 15px; }
+        .dash-card-row { display: flex; gap: 10px; margin-bottom: 12px; }
+        .dash-stat-card { flex: 1; background: #e4ebf5; padding: 12px; border-radius: 15px; box-shadow: 4px 4px 8px #c5d9e8, -4px -4px 8px #ffffff; text-align: center; }
+        .dash-stat-card h4 { font-size: 11px; color: #666; margin-bottom: 4px; }
+        .dash-stat-card p { font-size: 15px; font-weight: bold; color: #0066ff; }
+        .progress-bar-container { background: #e4ebf5; border-radius: 10px; height: 12px; box-shadow: inset 2px 2px 4px #c5d9e8, inset -2px -2px 4px #ffffff; margin: 10px 0 15px 0; overflow: hidden; }
+        .progress-bar { background: #0066ff; height: 100%; width: 0%; border-radius: 10px; }
+        .permission-checkboxes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #e4ebf5; padding: 12px; border-radius: 12px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; margin-bottom: 15px; font-size: 12px; color: #444; }
+        .permission-checkboxes label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div class="main-title">
+        <h1>Admin & Sub-Admin <span>Control Panel</span></h1>
+        <p>MOSQUE MANAGEMENT SYSTEM</p>
+    </div>
+
+    <div class="container">
+        <!-- সাইট মেনু -->
+        <div id="adminSideMenu" class="side-menu">
+            <button onclick="switchTab('dashboard')" id="menu-dashboard" class="active"><i class="fa-solid fa-chart-pie"></i> ড্যাশবোর্ড</button>
+            <button onclick="switchTab('notice')" id="menu-notice" class="nav-btn" data-perm="notice"><i class="fa-solid fa-mosque"></i> হোমপেজ ও নোটিশ কন্ট্রোল</button>
+            <button onclick="switchTab('paymentSettings')" id="menu-paymentSettings" class="nav-btn" data-perm="paymentSettings"><i class="fa-solid fa-mobile-screen-button"></i> বিকাশ/নগদ নাম্বার কন্ট্রোল</button>
+            <button onclick="switchTab('addUser')" id="menu-addUser" class="nav-btn" data-perm="addUser"><i class="fa-solid fa-user-plus"></i> নতুন কাস্টমার যোগ করুন</button>
+            <button onclick="switchTab('customerMoney')" id="menu-customerMoney" class="nav-btn" data-perm="customerMoney"><i class="fa-solid fa-wallet"></i> মাসের টাকা যোগ/আপডেট</button>
+            <button onclick="switchTab('paymentList')" id="menu-paymentList" class="nav-btn" data-perm="paymentList"><i class="fa-solid fa-receipt"></i> পেমেন্ট সাবমিশন লিস্ট</button>
+            <button onclick="switchTab('subAdmin')" id="menu-subAdmin" class="nav-btn-super" style="color: #8e44ad;"><i class="fa-solid fa-user-shield"></i> সাব-অ্যাডমিন ম্যানেজমেন্ট</button>
+            <button onclick="switchTab('expense')" id="menu-expense" class="nav-btn" data-perm="expense"><i class="fa-solid fa-file-invoice-dollar"></i> খরচ হিসাব (হুজুর বেতন ইত্যাদি)</button>
+            <button type="button" class="delete" style="margin-top: 10px; background:#e74c3c; color:#fff; border:none; padding:8px; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="logoutAdmin()"><i class="fa-solid fa-right-from-bracket" style="color:#fff;"></i> লগআউট</button>
+        </div>
+
+        <div class="superadmin-card">
+            <div class="card-icon">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <div class="card-header">
+                <h2 id="portalTitleText">Super Admin Portal</h2>
+                <p>মসজিদের তথ্য, নোটিশ, খরচ ও কাস্টমার ম্যানেজমেন্ট</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="superAdminLoginFormSection">
+                <form id="superAdminLoginForm">
+                    <div class="input-group">
+                        <label>Admin Username / Email</label>
+                        <div class="input-field">
+                            <i class="fa-solid fa-user"></i>
+                            <input type="text" id="adminUser" placeholder="admin বা sub-admin email" required>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Admin Password</label>
+                        <div class="input-field">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="adminPass" placeholder="••••••" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">ADMIN LOGIN</button>
+                </form>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="superAdminDashboardSection" style="display: none;">
+                
+                <!-- ড্যাশবোর্ড ট্যাব -->
+                <div id="tab-dashboard" class="admin-tab-content">
+                    <div class="profile-info">
+                        <div>
+                            <h3 id="welcomeAdminName">অ্যাডমিন ড্যাশবোর্ড</h3>
+                            <p id="welcomeAdminRole">সব নিয়ন্ত্রণ আপনার হাতে</p>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-box">
+                        <h3 style="font-size: 14px; color: #e67e22; margin-bottom: 12px;"><i class="fa-solid fa-chart-pie"></i> মাসিক ও বার্ষিক হিসাব সামারি</h3>
+                        <div class="input-group" style="margin-bottom: 10px;">
+                            <label>মাস বাছুন (সামারি দেখার জন্য)</label>
+                            <select id="summaryMonthFilter" onchange="updateFinancialSummary()" style="width: 100%; padding: 8px 12px; background: #e4ebf5; border: none; outline: none; border-radius: 8px; box-shadow: inset 2px 2px 4px #c5d9e8, inset -2px -2px 4px #ffffff; font-size: 12px;">
+                                <option value="সব">সকল মাস (সর্বমোট)</option>
+                                <option value="জানুয়ারি">জানুয়ারি</option><option value="ফেব্রুয়ারি">ফেব্রুয়ারি</option><option value="মার্চ">মার্চ</option><option value="এপ্রিল">এপ্রিল</option><option value="মে">মে</option><option value="জুন">জুন</option><option value="জুলাই">জুলাই</option><option value="আগস্ট">আগস্ট</option><option value="সেপ্টেম্বর">সেপ্টেম্বর</option><option value="অক্টোবর">অক্টোবর</option><option value="নভেম্বর">নভেম্বর</option><option value="ডিসেম্বর">ডিসেম্বর</option>
+                            </select>
+                        </div>
+                        <div class="dash-card-row">
+                            <div class="dash-stat-card">
+                                <h4>মোট উত্তোলন</h4>
+                                <p id="sumTotalPaid" style="color: #27ae60;">৳ 0</p>
+                            </div>
+                            <div class="dash-stat-card">
+                                <h4>মোট বকেয়া</h4>
+                                <p id="sumTotalDue" style="color: #e74c3c;">৳ 0</p>
+                            </div>
+                        </div>
+                        <div class="dash-card-row">
+                            <div class="dash-stat-card">
+                                <h4>টাকা দিয়েছেন</h4>
+                                <p id="sumPaidCount" style="color: #0066ff;">0 জন</p>
+                            </div>
+                            <div class="dash-stat-card">
+                                <h4>টাকা দেননি</h4>
+                                <p id="sumUnpaidCount" style="color: #c0392b;">0 জন</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer List Table -->
+                    <div id="adminCustomerListSection">
+                        <h3 style="font-size: 13px; color: #0066ff; margin-bottom: 5px;"><i class="fa-solid fa-users"></i> রেজিস্টার্ড কাস্টমার তালিকা</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>নাম ও আইডি</th><th>মোবাইল ও জিমেইল</th><th>অ্যাকশন</th></tr></thead>
+                                <tbody id="allUsersTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pending Users -->
+                    <h3 style="font-size: 13px; color: #e67e22; margin-top: 10px; margin-bottom: 5px;"><i class="fa-solid fa-clock"></i> পেন্ডিং অ্যাকাউন্ট রিকুয়েস্ট</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>নাম</th><th>জিমেইল</th><th>অ্যাকশন</th></tr></thead>
+                            <tbody id="pendingUsersTableBody"><tr><td colspan="3" style="text-align: center;">কোন রিকুয়েস্ট নেই</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- হোমপেজ ও নোটিশ কন্ট্রোল ট্যাব -->
+                <div id="tab-notice" class="admin-tab-content" style="display: none;">
+                    <div style="background: #e4ebf5; padding: 15px; border-radius: 15px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; margin-bottom: 20px;">
+                        <h3 style="font-size: 14px; color: #e67e22; margin-bottom: 12px;"><i class="fa-solid fa-mosque"></i> মসজিদের হোমপেজ ও নোটিশ কন্ট্রোল</h3>
+                        <form id="adminMosqueContentForm">
+                            <div class="input-group">
+                                <label>মসজিদের নাম</label>
+                                <div class="input-field"><i class="fa-solid fa-signature"></i><input type="text" id="adminMosqueName" required></div>
+                            </div>
+                            <div class="input-group">
+                                <label>মসজিদের অবস্থান</label>
+                                <div class="input-field"><i class="fa-solid fa-location-dot"></i><input type="text" id="adminMosqueLocation" required></div>
+                            </div>
+                            <div class="input-group">
+                                <label>পরিচিতি (Intro)</label>
+                                <div class="input-field" style="align-items: flex-start;"><i class="fa-solid fa-circle-info" style="top: 15px;"></i><textarea id="adminMosqueIntro" rows="2" style="padding: 12px 15px 12px 42px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px; width:100%;"></textarea></div>
+                            </div>
+                            <div class="input-group">
+                                <label>মসজিদের ইতিহাস</label>
+                                <div class="input-field" style="align-items: flex-start;"><i class="fa-solid fa-landmark" style="top: 15px;"></i><textarea id="adminMosqueHistory" rows="3" style="padding: 12px 15px 12px 42px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px; width:100%;"></textarea></div>
+                            </div>
+                            <div class="input-group">
+                                <label>জরুরি নোটিশ</label>
+                                <div class="input-field" style="align-items: flex-start;"><i class="fa-solid fa-bullhorn" style="top: 15px;"></i><textarea id="adminMosqueNotice" rows="2" style="padding: 12px 15px 12px 42px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px; width:100%;"></textarea></div>
+                            </div>
+                            <div class="input-group">
+                                <label>গ্যালারি ছবি লিংক (কমা দিয়ে একাধিক Image URL দিন)</label>
+                                <div class="input-field" style="align-items: flex-start;"><i class="fa-solid fa-images" style="top: 15px;"></i><textarea id="adminMosqueGallery" rows="2" placeholder="https://image1.jpg, https://image2.jpg" style="padding: 12px 15px 12px 42px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px; width:100%;"></textarea></div>
+                            </div>
+                            <button type="submit" class="action-btn-sm approve" style="width: 100%; padding: 10px; font-size: 13px;">হোমপেজ তথ্য আপডেট করুন</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- বিকাশ ও নগদ নাম্বার কন্ট্রোল ট্যাব -->
+                <div id="tab-paymentSettings" class="admin-tab-content" style="display: none;">
+                    <div style="background: #e4ebf5; padding: 15px; border-radius: 15px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; margin-bottom: 20px;">
+                        <h3 style="font-size: 14px; color: #e67e22; margin-bottom: 12px;"><i class="fa-solid fa-mobile-screen-button"></i> কাস্টমার পেমেন্ট বিকাশ ও নগদ নাম্বার সেটআপ</h3>
+                        <form id="adminPaymentSettingsForm">
+                            <div class="input-group">
+                                <label>বিকাশ নাম্বার (Personal/Merchant)</label>
+                                <div class="input-field"><i class="fa-solid fa-phone"></i><input type="text" id="adminBkashNumber" placeholder="যেমন: 01700000000" required></div>
+                            </div>
+                            <div class="input-group">
+                                <label>নগদ নাম্বার (Personal/Merchant)</label>
+                                <div class="input-field"><i class="fa-solid fa-phone"></i><input type="text" id="adminNagadNumber" placeholder="যেমন: 01800000000" required></div>
+                            </div>
+                            <div class="input-group">
+                                <label>পেমেন্ট সংক্রান্ত বিশেষ নির্দেশিকা (নোটিশ)</label>
+                                <div class="input-field" style="align-items: flex-start;"><i class="fa-solid fa-circle-info" style="top: 15px;"></i><textarea id="adminPaymentNotice" rows="2" placeholder="টাকা পাঠিয়ে ট্রানজেকশন আইডি দিন..." style="padding: 12px 15px 12px 42px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px; width:100%;"></textarea></div>
+                            </div>
+                            <button type="submit" class="action-btn-sm approve" style="width: 100%; padding: 10px; font-size: 13px;">পেমেন্ট নাম্বার ও তথ্য আপডেট করুন</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- নতুন কাস্টমার যোগ করুন ট্যাব -->
+                <div id="tab-addUser" class="admin-tab-content" style="display: none;">
+                    <div style="background: #e4ebf5; padding: 15px; border-radius: 15px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; margin-bottom: 15px;">
+                        <h3 style="font-size: 14px; color: #e67e22; margin-bottom: 12px;"><i class="fa-solid fa-user-plus"></i> নতুন কাস্টমার যোগ করুন</h3>
+                        <form id="adminAddUserForm">
+                            <div class="input-group">
+                                <label>নাম</label>
+                                <input type="text" id="newAccName" placeholder="কাস্টমারের নাম" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                            </div>
+                            <div class="input-group">
+                                <label>ফোন নাম্বার</label>
+                                <input type="tel" id="newAccPhone" placeholder="ফোন নাম্বার" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                            </div>
+                            <div class="input-group">
+                                <label>জিমেইল</label>
+                                <input type="email" id="newAccEmail" placeholder="জিমেইল" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                            </div>
+                            <div class="input-group">
+                                <label>পাসওয়ার্ড</label>
+                                <input type="password" id="newAccPass" placeholder="পাসওয়ার্ড" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                            </div>
+                            <button type="submit" class="action-btn-sm approve" style="width: 100%; padding: 10px; font-size: 13px;">কাস্টমার তৈরি করুন</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- কাস্টমারের মাসের টাকা যোগ বা আপডেট ট্যাব -->
+                <div id="tab-customerMoney" class="admin-tab-content" style="display: none;">
+                    <div style="background: #e4ebf5; padding: 15px; border-radius: 15px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; margin-bottom: 15px;">
+                        <h3 style="font-size: 14px; color: #e67e22; margin-bottom: 12px;"><i class="fa-solid fa-wallet"></i> কাস্টমারের মাসের টাকা যোগ বা আপডেট</h3>
+                        
+                        <div class="input-group">
+                            <label>কাস্টমার নির্বাচন করুন</label>
+                            <select id="moneyTargetCustomer" onchange="loadCustomerMonthlyDataForUpdate()" style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                                <option value="">-- কাস্টমার বাছুন --</option>
+                            </select>
+                        </div>
+
+                        <div id="customerMoneyUpdateArea" style="display: none;">
+                            <div class="profile-info" style="margin-top: 10px;">
+                                <div>
+                                    <h4 id="selectedCustNameDisp" style="font-size: 14px; color: #333;">নাম: -</h4>
+                                    <p id="selectedCustIdDisp" style="font-size: 11px; color: #0066ff;">আইডি: -</p>
+                                </div>
+                            </div>
+
+                            <form id="adminClientMonthForm">
+                                <div class="input-group">
+                                    <label>মাসের নাম</label>
+                                    <select id="adminMonthName" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                                        <option value="">মাস বাছুন</option>
+                                        <option value="জানুয়ারি">জানুয়ারি</option><option value="ফেব্রুয়ারি">ফেব্রুয়ারি</option><option value="মার্চ">মার্চ</option><option value="এপ্রিল">এপ্রিল</option><option value="মে">মে</option><option value="জুন">জুন</option><option value="জুলাই">জুলাই</option><option value="আগস্ট">আগস্ট</option><option value="সেপ্টেম্বর">সেপ্টেম্বর</option><option value="অক্টোবর">অক্টোবর</option><option value="নভেম্বর">নভেম্বর</option><option value="ডিসেম্বর">ডিসেম্বর</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>ধার্যকৃত টাকা (টাকা)</label>
+                                    <input type="number" id="adminMonthDharjo" placeholder="যেমন: ৪০০০" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                                </div>
+                                <div class="input-group">
+                                    <label>প্রদত্ত টাকা (টাকা)</label>
+                                    <input type="number" id="adminMonthPaid" placeholder="যেমন: ৪০০০" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                                </div>
+                                <button type="submit" class="action-btn-sm approve" style="width: 100%; padding: 10px; font-size: 13px;">মাসিক হিসাব সেভ বা আপডেট করুন</button>
+                            </form>
+
+                            <h4 style="font-size: 12px; color: #0066ff; margin: 15px 0 8px 0;">কাস্টমারের বর্তমান মাসের রেকর্ডসমূহ:</h4>
+                            <div class="table-container" style="max-height: 200px;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>মাস</th>
+                                            <th>ধার্যকৃত</th>
+                                            <th>দিয়েছে</th>
+                                            <th>বাকি</th>
+                                            <th>অ্যাকশন</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="moneyTabMonthsTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- পেমেন্ট সাবমিশন লিস্ট ট্যাব -->
+                <div id="tab-paymentList" class="admin-tab-content" style="display: none;">
+                    <div style="background: #e4ebf5; padding: 15px; border-radius: 15px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; margin-bottom: 15px;">
+                        <h3 style="font-size: 14px; color: #27ae60; margin-bottom: 12px;"><i class="fa-solid fa-receipt"></i> পেমেন্ট সাবমিশন লিস্ট</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>ফোন</th><th>TrxID</th><th>টাকা</th><th>মাস</th><th>অ্যাকশন</th></tr></thead>
+                                <tbody id="pendingPaymentsTableBody"><tr><td colspan="5" style="text-align: center;">কোন পেমেন্ট নেই</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- সাব-অ্যাডমিন ম্যানেজমেন্ট ট্যাব -->
+                <div id="tab-subAdmin" class="admin-tab-content" style="display: none;">
+                    <div style="background: #e4ebf5; padding: 15px; border-radius: 15px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; margin-bottom: 15px;">
+                        <h3 style="font-size: 14px; color: #8e44ad; margin-bottom: 12px;"><i class="fa-solid fa-user-shield"></i> নতুন সাব-অ্যাডমিন তৈরি ও পারমিশন</h3>
+                        <form id="addSubAdminForm">
+                            <div class="input-group">
+                                <label>সাব-অ্যাডমিন নাম</label>
+                                <input type="text" id="subName" placeholder="নাম" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                            </div>
+                            <div class="input-group">
+                                <label>জিমেইল (লগইন ইউজারনেম)</label>
+                                <input type="email" id="subEmail" placeholder="email@gmail.com" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                            </div>
+                            <div class="input-group">
+                                <label>পাসওয়ার্ড</label>
+                                <input type="password" id="subPass" placeholder="পাসওয়ার্ড" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                            </div>
+                            <label style="font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; display:block;">পারমিশন সিলেক্ট করুন:</label>
+                            <div class="permission-checkboxes">
+                                <label><input type="checkbox" name="subPerm" value="notice"> হোমপেজ ও নোটিশ</label>
+                                <label><input type="checkbox" name="subPerm" value="paymentSettings"> পেমেন্ট নাম্বার কন্ট্রোল</label>
+                                <label><input type="checkbox" name="subPerm" value="addUser"> কাস্টমার যোগ</label>
+                                <label><input type="checkbox" name="subPerm" value="customerMoney"> মাসের টাকা আপডেট</label>
+                                <label><input type="checkbox" name="subPerm" value="paymentList"> পেমেন্ট লিস্ট</label>
+                                <label><input type="checkbox" name="subPerm" value="expense"> খরচ হিসাব</label>
+                            </div>
+                            <button type="submit" class="action-btn-sm view" style="width: 100%; padding: 10px; font-size: 13px; background: #8e44ad; color:#fff;">সাব-অ্যাডমিন তৈরি করুন</button>
+                        </form>
+
+                        <h4 style="font-size: 13px; color: #333; margin: 15px 0 8px 0;">সক্রিয় সাব-অ্যাডমিন তালিকা:</h4>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>নাম ও জিমেইল</th><th>পারমিশনসমূহ</th><th>অ্যাকশন</th></tr></thead>
+                                <tbody id="subAdminTableBody"><tr><td colspan="3" style="text-align: center;">কোন সাব-অ্যাডমিন নেই</td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- খরচ হিসাব ট্যাব -->
+                <div id="tab-expense" class="admin-tab-content" style="display: none;">
+                    <div style="background: #e4ebf5; padding: 15px; border-radius: 15px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; margin-bottom: 15px;">
+                        <h3 style="font-size: 14px; color: #e67e22; margin-bottom: 12px;"><i class="fa-solid fa-file-invoice-dollar"></i> মসজিদের খরচ হিসাব ম্যানেজমেন্ট</h3>
+                        <form id="addExpenseForm">
+                            <div class="input-group">
+                                <label>খরচের খাত নির্বাচন বা লিখুন</label>
+                                <select id="expenseCategory" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                                    <option value="">-- খাত বাছুন --</option>
+                                    <option value="হুজুর বেতন">হুজুর বেতন</option>
+                                    <option value="বিদ্যুৎ বিল">বিদ্যুৎ বিল</option>
+                                    <option value="পানি বিল">পানি বিল</option>
+                                    <option value="মসজিদ মেরামত">মসজিদ মেরামত</option>
+                                    <option value="অন্যান্য">অন্যান্য</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>মাস নির্বাচন করুন</label>
+                                <select id="expenseMonth" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                                    <option value="">মাস বাছুন</option>
+                                    <option value="জানুয়ারি">জানুয়ারি</option><option value="ফেব্রুয়ারি">ফেব্রুয়ারি</option><option value="মার্চ">মার্চ</option><option value="এপ্রিল">এপ্রিল</option><option value="মে">মে</option><option value="জুন">জুন</option><option value="জুলাই">জুলাই</option><option value="আগস্ট">আগস্ট</option><option value="সেপ্টেম্বর">সেপ্টেম্বর</option><option value="অক্টোবর">অক্টোবর</option><option value="নভেম্বর">নভেম্বর</option><option value="ডিসেম্বর">ডিসেম্বর</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>টাকার পরিমাণ (টাকা)</label>
+                                <input type="number" id="expenseAmount" placeholder="যেমন: ৫০০০" required style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                            </div>
+                            <div class="input-group">
+                                <label>বিবরণ / নোট (ঐচ্ছিক)</label>
+                                <input type="text" id="expenseNote" placeholder="যেমন: জুলাই মাসের বিদ্যুৎ বিল" style="width: 100%; padding: 12px 15px; background: #e4ebf5; border: none; outline: none; border-radius: 12px; box-shadow: inset 4px 4px 8px #c5d9e8, inset -4px -4px 8px #ffffff; font-size: 13px;">
+                            </div>
+                            <button type="submit" class="action-btn-sm approve" style="width: 100%; padding: 10px; font-size: 13px;">খরচ এন্ট্রি করুন</button>
+                        </form>
+
+                        <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <h4 style="font-size: 13px; color: #333;">খরচের তালিকা ও ফিল্টার:</h4>
+                            <select id="expenseFilterMonth" onchange="renderExpenseTable()" style="padding: 6px 10px; background: #e4ebf5; border: none; border-radius: 8px; box-shadow: inset 2px 2px 4px #c5d9e8, inset -2px -2px 4px #ffffff; font-size: 11px;">
+                                <option value="সব">সকল মাস</option>
+                                <option value="জানুয়ারি">জানুয়ারি</option><option value="ফেব্রুয়ারি">ফেব্রুয়ারি</option><option value="মার্চ">মার্চ</option><option value="এপ্রিল">এপ্রিল</option><option value="মে">মে</option><option value="জুন">জুন</option><option value="জুলাই">জুলাই</option><option value="আগস্ট">আগস্ট</option><option value="সেপ্টেম্বর">সেপ্টেম্বর</option><option value="অক্টোবর">অক্টোবর</option><option value="নভেম্বর">নভেম্বর</option><option value="ডিসেম্বর">ডিসেম্বর</option>
+                            </select>
+                        </div>
+                        <div class="table-container" style="margin-top: 8px;">
+                            <table>
+                                <thead><tr><th>খাত</th><th>মাস</th><th>টাকা</th><th>নোট</th><th>অ্যাকশন</th></tr></thead>
+                                <tbody id="expenseTableBody"><tr><td colspan="5" style="text-align: center;">কোন খরচ এন্ট্রি নেই</td></tr></tbody>
+                            </table>
+                        </div>
+                        <div style="text-align: right; font-weight: bold; font-size: 13px; color: #e74c3c; margin-top: 5px;">
+                            মোট খরচ: <span id="totalExpenseDisp">৳ 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Edit Profile Form -->
+                <div id="editCustomerSection" style="background: #e4ebf5; padding: 12px; border-radius: 12px; box-shadow: inset 3px 3px 6px #c5d9e8, inset -3px -3px 6px #ffffff; margin-bottom: 15px; display: none;">
+                    <h3 id="editFormTitle" style="font-size: 13px; color: #0066ff; margin-bottom: 8px;"><i class="fa-solid fa-user-pen"></i> কাস্টমার তথ্য এডিট করুন</h3>
+                    <form id="adminEditCustomerForm">
+                        <input type="hidden" id="editOriginalEmail">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                            <input type="text" id="editAccName" placeholder="নাম" required style="padding: 8px; border-radius: 8px; border: none; background: #e4ebf5; box-shadow: inset 2px 2px 4px #c5d9e8, inset -2px -2px 4px #ffffff; font-size: 12px;">
+                            <input type="tel" id="editAccPhone" placeholder="ফোন নাম্বার" required style="padding: 8px; border-radius: 8px; border: none; background: #e4ebf5; box-shadow: inset 2px 2px 4px #c5d9e8, inset -2px -2px 4px #ffffff; font-size: 12px;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                            <input type="email" id="editAccEmail" placeholder="জিমেইল" required style="padding: 8px; border-radius: 8px; border: none; background: #e4ebf5; box-shadow: inset 2px 2px 4px #c5d9e8, inset -2px -2px 4px #ffffff; font-size: 12px;">
+                            <input type="text" id="editAccPass" placeholder="নতুন পাসওয়ার্ড" required style="padding: 8px; border-radius: 8px; border: none; background: #e4ebf5; box-shadow: inset 2px 2px 4px #c5d9e8, inset -2px -2px 4px #ffffff; font-size: 12px;">
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="submit" class="action-btn-sm edit" style="flex: 2; padding: 8px; font-size: 12px;">আপডেট করুন</button>
+                            <button type="button" class="action-btn-sm delete" style="flex: 1; padding: 8px; font-size: 12px;" onclick="cancelEditCustomer()">বাতিল</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Client Dashboard View Modal / Section for Admin -->
+                <div id="adminViewClientSection" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="color: #8e44ad; font-size: 14px;"><i class="fa-solid fa-id-card"></i> কাস্টমার ড্যাশবোর্ড ভিউ ও এডিট</h3>
+                        <button class="action-btn-sm delete" onclick="closeClientView()">তালিকায় ফিরে যান</button>
+                    </div>
+                    <div class="dashboard-box">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <div style="width: 45px; height: 45px; background: #e4ebf5; border-radius: 50%; margin: 0 auto 5px auto; display: flex; align-items: center; justify-content: center; box-shadow: 3px 3px 6px #c5d9e8, -3px -3px 6px #ffffff; color: #27ae60;">
+                                <i class="fa-solid fa-user-check"></i>
+                            </div>
+                            <h3 id="viewClientName" style="font-size: 16px; color: #333;">Customer Name</h3>
+                            <p style="font-size: 11px; color: #777;">Client Dashboard Overview</p>
+                        </div>
+                        <div class="dash-card-row">
+                            <div class="dash-stat-card">
+                                <h4>আইডি নম্বর</h4>
+                                <p id="viewClientId">M-101</p>
+                            </div>
+                            <div class="dash-stat-card">
+                                <h4>মোবাইল</h4>
+                                <p id="viewClientPhone" style="font-size: 13px;">01700000000</p>
+                            </div>
+                        </div>
+                        <div class="dash-card-row">
+                            <div class="dash-stat-card">
+                                <h4>সর্বমোট জমা</h4>
+                                <p id="viewClientTotalPaid" style="color: #27ae60;">৳ 0</p>
+                            </div>
+                            <div class="dash-stat-card">
+                                <h4>সর্বমোট বকেয়া</h4>
+                                <p id="viewClientTotalDue" style="color: #e74c3c;">৳ 0</p>
+                            </div>
+                        </div>
+                        <div style="font-size: 11px; font-weight: bold; color: #555; display: flex; justify-content: space-between;">
+                            <span>অগ্রগতি (Progress)</span>
+                            <span id="viewClientProgressText">0%</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="viewClientProgressBar"></div>
+                        </div>
+
+                        <!-- কাস্টমার পেমেন্ট সেকশন -->
+                        <div class="dashboard-box" style="margin-top: 15px; background: #dce5f2;">
+                            <h4 style="font-size: 13px; color: #e67e22; margin-bottom: 8px;"><i class="fa-solid fa-wallet"></i> অনলাইন পেমেন্ট তথ্য (বিকাশ ও নগদ)</h4>
+                            <p style="font-size: 12px; color: #333; margin-bottom: 5px;">বিকাশ নাম্বার: <b id="customerViewBkash" style="color:#e67e22;">-</b></p>
+                            <p style="font-size: 12px; color: #333; margin-bottom: 5px;">নগদ নাম্বার: <b id="customerViewNagad" style="color:#e67e22;">-</b></p>
+                            <p style="font-size: 11px; color: #555; margin-top: 8px;" id="customerViewPaymentNotice">-</p>
+                        </div>
+
+                        <h4 style="font-size: 12px; color: #e67e22; margin-bottom: 6px;"><i class="fa-solid fa-calendar-days"></i> মাসিক হিসাব (এডিটযোগ্য)</h4>
+                        <div class="table-container" style="max-height: 220px; background: #e4ebf5;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>মাস</th>
+                                        <th>ধার্যকৃত</th>
+                                        <th>দিয়েছে</th>
+                                        <th>বাকি</th>
+                                        <th>অ্যাকশন</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="viewClientMonthsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK & Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBqDoZXHqjTeQTJlZrqxrTH8DlpdA8x8cs",
+          authDomain: "final-test-65142.firebaseapp.com",
+          projectId: "final-test-65142",
+          storageBucket: "final-test-65142.firebasestorage.app",
+          messagingSenderId: "281879100190",
+          appId: "1:281879100190:web:34e4ba3f9f929d7caea70f",
+          measurementId: "G-GSVBLESVY4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        window.db = db;
+        window.FirestoreTools = { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc };
+
+        async function syncDataFromFirebase() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "clientsData"));
+                let cloudClients = {};
+                querySnapshot.forEach((docSnap) => {
+                    cloudClients[docSnap.id] = docSnap.data();
+                });
+                if(Object.keys(cloudClients).length > 0) {
+                    window.clientsData = cloudClients;
+                    localStorage.setItem('clientsData', JSON.stringify(cloudClients));
+                }
+                if(typeof loadSuperAdminData === 'function') loadSuperAdminData();
+            } catch(e) {
+                console.log("Firebase sync offline or error:", e);
+            }
+        }
+        syncDataFromFirebase();
+    </script>
+
+    <script>
+        let clientsData = JSON.parse(localStorage.getItem('clientsData')) || {};
+        let pendingUsers = JSON.parse(localStorage.getItem('pendingUsers')) || {};
+        let pendingPayments = JSON.parse(localStorage.getItem('pendingPayments')) || [];
+        let subAdmins = JSON.parse(localStorage.getItem('subAdmins')) || {};
+        let expensesData = JSON.parse(localStorage.getItem('expensesData')) || [];
+        let idCounter = parseInt(localStorage.getItem('idCounter')) || 100;
+        let currentViewingEmail = null;
+        let loggedInAdminRole = 'superadmin'; 
+        let currentSubAdminPermissions = [];
+
+        let mosqueInfo = JSON.parse(localStorage.getItem('mosqueInfo')) || {
+            name: "কেন্দ্রীয় জামে মসজিদ",
+            location: "স্থান: ঢাকা, বাংলাদেশ",
+            intro: "এখানে নিয়মিত ৫ ওয়াক্ত জামায়াত, জুমা এবং ইসলামিক শিক্ষা কার্যক্রম পরিচালিত হয়।",
+            history: "প্রতিষ্ঠাকাল থেকে অদ্যাবধি এই মসজিদ এলাকার দ্বীনি শিক্ষা বিস্তার ও সমাজ কল্যাণে গুরুত্বপূর্ণ ভূমিকা পালন করে আসছে।",
+            notice: "আসন্ন জুম্মার নামাজে বিশেষ বয়ান ও দোয়া অনুষ্ঠিত হবে।",
+            gallery: [
+                "https://images.unsplash.com/photo-1564769625905-50e936150ac6?w=300",
+                "https://images.unsplash.com/photo-1542838132-92c53300491e?w=300"
+            ]
+        };
+
+        let paymentSettings = JSON.parse(localStorage.getItem('paymentSettings')) || {
+            bkash: "01700000000 (Personal)",
+            nagad: "01800000000 (Personal)",
+            notice: "টাকা পাঠানোর পর সঠিক TrxID এবং ফোন নাম্বার দিয়ে পেমেন্ট সাবমিট করুন।"
+        };
+
+        async function saveToCloudAndLocal(collectionName, docId, data) {
+            localStorage.setItem(collectionName, JSON.stringify(data));
+            if(window.db && window.FirestoreTools) {
+                try {
+                    const { doc, setDoc } = window.FirestoreTools;
+                    if(typeof data === 'object' && !Array.isArray(data)) {
+                        await setDoc(doc(window.db, collectionName, docId), data);
+                    }
+                } catch(e) {
+                    console.error("Cloud save failed:", e);
+                }
+            }
+        }
+
+        function switchTab(tabId) {
+            if(loggedInAdminRole !== 'superadmin' && tabId !== 'dashboard') {
+                if(!currentSubAdminPermissions.includes(tabId)) {
+                    alert('দুঃখিত! এই সেকশনটি দেখার বা এডিট করার অনুমতি আপনার নেই।');
+                    return;
+                }
+            }
+
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.side-menu button').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).style.display = 'block';
+            if(document.getElementById('menu-' + tabId)) {
+                document.getElementById('menu-' + tabId).classList.add('active');
+            }
+
+            if(tabId === 'customerMoney') {
+                populateMoneyCustomerDropdown();
+            }
+            if(tabId === 'expense') {
+                renderExpenseTable();
+            }
+            if(tabId === 'paymentSettings') {
+                loadPaymentSettingsForm();
+            }
+        }
+
+        function loadMosqueFormValues() {
+            document.getElementById('adminMosqueName').value = mosqueInfo.name || "";
+            document.getElementById('adminMosqueLocation').value = mosqueInfo.location || "";
+            document.getElementById('adminMosqueIntro').value = mosqueInfo.intro || "";
+            document.getElementById('adminMosqueHistory').value = mosqueInfo.history || "";
+            document.getElementById('adminMosqueNotice').value = mosqueInfo.notice || "";
+            document.getElementById('adminMosqueGallery').value = mosqueInfo.gallery ? mosqueInfo.gallery.join(", ") : "";
+        }
+
+        function loadPaymentSettingsForm() {
+            document.getElementById('adminBkashNumber').value = paymentSettings.bkash || "";
+            document.getElementById('adminNagadNumber').value = paymentSettings.nagad || "";
+            document.getElementById('adminPaymentNotice').value = paymentSettings.notice || "";
+        }
+
+        document.getElementById('adminPaymentSettingsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            paymentSettings.bkash = document.getElementById('adminBkashNumber').value.trim();
+            paymentSettings.nagad = document.getElementById('adminNagadNumber').value.trim();
+            paymentSettings.notice = document.getElementById('adminPaymentNotice').value.trim();
+
+            saveToCloudAndLocal('paymentSettings', 'main', paymentSettings);
+            alert('বিকাশ ও নগদ পেমেন্ট নাম্বার সফলভাবে আপডেট করা হয়েছে!');
+        });
+
+        document.getElementById('adminMosqueContentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            mosqueInfo.name = document.getElementById('adminMosqueName').value.trim();
+            mosqueInfo.location = document.getElementById('adminMosqueLocation').value.trim();
+            mosqueInfo.intro = document.getElementById('adminMosqueIntro').value.trim();
+            mosqueInfo.history = document.getElementById('adminMosqueHistory').value.trim();
+            mosqueInfo.notice = document.getElementById('adminMosqueNotice').value.trim();
+            
+            let galleryRaw = document.getElementById('adminMosqueGallery').value.trim();
+            mosqueInfo.gallery = galleryRaw ? galleryRaw.split(',').map(url => url.trim()) : [];
+
+            saveToCloudAndLocal('mosqueInfo', 'main', mosqueInfo);
+            alert('মসজিদের হোমপেজ তথ্য সফলভাবে আপডেট করা হয়েছে!');
+        });
+
+        document.getElementById('superAdminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const u = document.getElementById('adminUser').value.trim().toLowerCase();
+            const p = document.getElementById('adminPass').value.trim();
+
+            if(u === 'superadmin' && p === 'admin123') {
+                loggedInAdminRole = 'superadmin';
+                currentSubAdminPermissions = ['notice', 'paymentSettings', 'addUser', 'customerMoney', 'paymentList', 'expense'];
+                initAdminDashboardUI('Super Admin Portal', 'সুপার অ্যাডমিন ড্যাশবোর্ড', true);
+            } else if(subAdmins[u] && subAdmins[u].password === p) {
+                loggedInAdminRole = u;
+                currentSubAdminPermissions = subAdmins[u].permissions || [];
+                initAdminDashboardUI('Sub Admin Portal', 'সাব-অ্যাডমিন ড্যাশবোর্ড: ' + subAdmins[u].name, false);
+            } else {
+                alert('ভুল ইউজারনেম বা পাসওয়ার্ড!');
+            }
+        });
+
+        function initAdminDashboardUI(portalTitle, welcomeText, isSuper) {
+            document.getElementById('portalTitleText').innerText = portalTitle;
+            document.getElementById('welcomeAdminName').innerText = welcomeText;
+            document.getElementById('superAdminLoginFormSection').style.display = 'none';
+            document.getElementById('superAdminDashboardSection').style.display = 'block';
+            document.getElementById('adminSideMenu').style.display = 'flex';
+
+            document.querySelectorAll('.nav-btn-super').forEach(el => {
+                el.style.display = isSuper ? 'flex' : 'none';
+            });
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                let perm = btn.getAttribute('data-perm');
+                if(isSuper || currentSubAdminPermissions.includes(perm)) {
+                    btn.style.display = 'flex';
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
+
+            loadMosqueFormValues();
+            loadPaymentSettingsForm();
+            loadSuperAdminData();
+            loadSubAdminsList();
+            updateFinancialSummary();
+        }
+
+        function logoutAdmin() {
+            loggedInAdminRole = 'superadmin';
+            currentSubAdminPermissions = [];
+            document.getElementById('superAdminDashboardSection').style.display = 'none';
+            document.getElementById('adminSideMenu').style.display = 'none';
+            document.getElementById('superAdminLoginFormSection').style.display = 'block';
+            document.getElementById('portalTitleText').innerText = 'Super Admin Portal';
+            document.getElementById('superAdminLoginForm').reset();
+        }
+
+        document.getElementById('addSubAdminForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('subName').value.trim();
+            const email = document.getElementById('subEmail').value.trim().toLowerCase();
+            const password = document.getElementById('subPass').value.trim();
+            
+            let checkboxes = document.querySelectorAll('input[name="subPerm"]:checked');
+            let permissions = [];
+            checkboxes.forEach(cb => permissions.push(cb.value));
+
+            subAdmins[email] = { name, email, password, permissions };
+            saveToCloudAndLocal('subAdmins', 'all', subAdmins);
+            alert('সাব-অ্যাডমিন সফলভাবে তৈরি করা হয়েছে!');
+            document.getElementById('addSubAdminForm').reset();
+            loadSubAdminsList();
+        });
+
+        function loadSubAdminsList() {
+            let tbody = document.getElementById('subAdminTableBody');
+            let keys = Object.keys(subAdmins);
+            let html = '';
+            if(keys.length === 0) {
+                html = '<tr><td colspan="3" style="text-align: center;">কোন সাব-অ্যাডমিন নেই</td></tr>';
+            } else {
+                keys.forEach(email => {
+                    let sub = subAdmins[email];
+                    html += `<tr>
+                        <td><b>${sub.name}</b><br><span style="color:#777; font-size:10px;">${sub.email}</span></td>
+                        <td>${sub.permissions.join(', ')}</td>
+                        <td><button class="action-btn-sm delete" onclick="deleteSubAdmin('${email}')">মুছুন</button></td>
+                    </tr>`;
+                });
+            }
+            tbody.innerHTML = html;
+        }
+
+        function deleteSubAdmin(email) {
+            if(confirm('এই সাব-অ্যাডমিনকে ডিলিট করতে চান?')) {
+                delete subAdmins[email];
+                saveToCloudAndLocal('subAdmins', 'all', subAdmins);
+                loadSubAdminsList();
+            }
+        }
+
+        document.getElementById('addExpenseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const category = document.getElementById('expenseCategory').value;
+            const month = document.getElementById('expenseMonth').value;
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const note = document.getElementById('expenseNote').value.trim();
+
+            expensesData.push({ id: Date.now(), category, month, amount, note });
+            saveToCloudAndLocal('expensesData', 'all', expensesData);
+            alert('খরচ সফলভাবে এন্ট্রি করা হয়েছে!');
+            document.getElementById('addExpenseForm').reset();
+            renderExpenseTable();
+        });
+
+        function renderExpenseTable() {
+            let filterMonth = document.getElementById('expenseFilterMonth').value;
+            let tbody = document.getElementById('expenseTableBody');
+            let html = '';
+            let totalExpense = 0;
+
+            expensesData.forEach((exp, index) => {
+                if(filterMonth === 'সব' || exp.month === filterMonth) {
+                    totalExpense += exp.amount;
+                    html += `<tr>
+                        <td><b>${exp.category}</b></td>
+                        <td>${exp.month}</td>
+                        <td style="color:#e74c3c;">৳${exp.amount}</td>
+                        <td>${exp.note || '-'}</td>
+                        <td><button class="action-btn-sm delete" onclick="deleteExpense(${index})">ডিলিট</button></td>
+                    </tr>`;
+                }
+            });
+
+            if(html === '') {
+                html = '<tr><td colspan="5" style="text-align: center;">কোন খরচ এন্ট্রি পাওয়া যায়নি</td></tr>';
+            }
+            tbody.innerHTML = html;
+            document.getElementById('totalExpenseDisp').innerText = "৳ " + totalExpense;
+        }
+
+        function deleteExpense(index) {
+            if(confirm('এই খরচ এন্ট্রিটি ডিলিট করতে চান?')) {
+                expensesData.splice(index, 1);
+                saveToCloudAndLocal('expensesData', 'all', expensesData);
+                renderExpenseTable();
+            }
+        }
+
+        function updateFinancialSummary() {
+            let selectedMonth = document.getElementById('summaryMonthFilter').value;
+            let totalPaid = 0, totalDue = 0;
+            let paidCount = 0, unpaidCount = 0;
+
+            let clientKeys = Object.keys(clientsData);
+            clientKeys.forEach(email => {
+                let c = clientsData[email];
+                if(c.payments && Array.isArray(c.payments)) {
+                    if(selectedMonth === 'সব') {
+                        let cPaid = 0, cDharjo = 0;
+                        c.payments.forEach(p => {
+                            cPaid += (p.paid || 0);
+                            cDharjo += (p.dharjo || 0);
+                        });
+                        totalPaid += cPaid;
+                        let due = cDharjo - cPaid;
+                        if(due > 0) totalDue += due;
+                        if(cPaid > 0) paidCount++;
+                        else unpaidCount++;
+                    } else {
+                        let match = c.payments.find(p => p.month === selectedMonth);
+                        if(match) {
+                            let mPaid = match.paid || 0;
+                            let mDharjo = match.dharjo || 0;
+                            totalPaid += mPaid;
+                            let due = mDharjo - mPaid;
+                            if(due > 0) totalDue += due;
+                            if(mPaid > 0) paidCount++;
+                            else unpaidCount++;
+                        } else {
+                            unpaidCount++;
+                        }
+                    }
+                } else {
+                    unpaidCount++;
+                }
+            });
+
+            document.getElementById('sumTotalPaid').innerText = "৳ " + totalPaid;
+            document.getElementById('sumTotalDue').innerText = "৳ " + totalDue;
+            document.getElementById('sumPaidCount').innerText = paidCount + " জন";
+            document.getElementById('sumUnpaidCount').innerText = unpaidCount + " জন";
+        }
+
+        function loadSuperAdminData() {
+            let pendingUsersHTML = '';
+            let keys = Object.keys(pendingUsers);
+            if(keys.length === 0) {
+                pendingUsersHTML = '<tr><td colspan="3" style="text-align: center;">কোন পেন্ডিং রিকুয়েস্ট নেই</td></tr>';
+            } else {
+                keys.forEach(email => {
+                    let u = pendingUsers[email];
+                    pendingUsersHTML += `<tr><td>${u.name}</td><td>${u.email}</td><td><button class="action-btn-sm approve" onclick="confirmUser('${email}')">কনফার্ম</button> <button class="action-btn-sm delete" onclick="rejectUser('${email}')">বাতিল</button></td></tr>`;
+                });
+            }
+            document.getElementById('pendingUsersTableBody').innerHTML = pendingUsersHTML;
+
+            let pendingPayHTML = '';
+            if(pendingPayments.length === 0) {
+                pendingPayHTML = '<tr><td colspan="5" style="text-align: center;">কোন পেমেন্ট সাবমিশন নেই</td></tr>';
+            } else {
+                pendingPayments.forEach((pay, index) => {
+                    pendingPayHTML += `<tr><td>${pay.phone}</td><td><b>${pay.trxId}</b></td><td>৳${pay.amount}</td><td>${pay.month}</td><td><button class="action-btn-sm approve" onclick="confirmPayment(${index})">কনফার্ম</button></td></tr>`;
+                });
+            }
+            document.getElementById('pendingPaymentsTableBody').innerHTML = pendingPayHTML;
+
+            let clientKeys = Object.keys(clientsData);
+            let allUsersHTML = '';
+            if(clientKeys.length === 0) {
+                allUsersHTML = '<tr><td colspan="3" style="text-align: center;">কোন কাস্টমার নেই</td></tr>';
+            } else {
+                clientKeys.forEach(email => {
+                    let c = clientsData[email];
+                    allUsersHTML += `<tr>
+                        <td>
+                            <b>${c.name}</b><br>
+                            <span style="color:#0066ff; font-weight:bold;">${c.idNo}</span>
+                        </td>
+                        <td>
+                            <span style="color:#333;">${c.phone}</span><br>
+                            <span style="color:#777; font-size:10px;">${c.email}</span>
+                        </td>
+                        <td style="text-align: right;">
+                            <div class="dropdown">
+                                <button onclick="toggleDropdown(event, '${email}')" class="dropbtn"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                                <div id="dropdown-${email}" class="dropdown-content">
+                                    <button onclick="viewClientProfile('${email}')"><i class="fa-solid fa-eye" style="color:#8e44ad;"></i> ভিউ প্রোফাইল</button>
+                                    <button onclick="openEditCustomer('${email}')"><i class="fa-solid fa-pen" style="color:#0066ff;"></i> এডিট</button>
+                                    <button onclick="deleteCustomer('${email}')"><i class="fa-solid fa-trash" style="color:#e74c3c;"></i> মুছুন</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('allUsersTableBody').innerHTML = allUsersHTML;
+            updateFinancialSummary();
+        }
+
+        function populateMoneyCustomerDropdown() {
+            let select = document.getElementById('moneyTargetCustomer');
+            let optionsHTML = '<option value="">-- কাস্টমার বাছুন --</option>';
+            let clientKeys = Object.keys(clientsData);
+            clientKeys.forEach(email => {
+                let c = clientsData[email];
+                optionsHTML += `<option value="${email}">${c.name} (${c.idNo} - ${c.phone})</option>`;
+            });
+            select.innerHTML = optionsHTML;
+        }
+
+        function loadCustomerMonthlyDataForUpdate() {
+            let email = document.getElementById('moneyTargetCustomer').value;
+            let updateArea = document.getElementById('customerMoneyUpdateArea');
+            if(!email) {
+                updateArea.style.display = 'none';
+                return;
+            }
+            let c = clientsData[email];
+            if(!c) return;
+
+            updateArea.style.display = 'block';
+            document.getElementById('selectedCustNameDisp').innerText = "নাম: " + c.name;
+            document.getElementById('selectedCustIdDisp').innerText = "আইডি: " + c.idNo;
+
+            renderMoneyTabTable(email);
+        }
+
+        function renderMoneyTabTable(email) {
+            let c = clientsData[email];
+            let tbody = document.getElementById('moneyTabMonthsTableBody');
+            let rowsHTML = '';
+            if(c.payments && Array.isArray(c.payments)) {
+                c.payments.forEach((item, idx) => {
+                    let due = (item.dharjo || 0) - (item.paid || 0);
+                    if(due < 0) due = 0;
+                    rowsHTML += `<tr>
+                        <td><b>${item.month}</b></td>
+                        <td>৳${item.dharjo}</td>
+                        <td style="color:#27ae60;">৳${item.paid}</td>
+                        <td style="color:#e74c3c;">৳${due}</td>
+                        <td>
+                            <button class="action-btn-sm edit" onclick="editMoneyTabMonth('${email}', ${idx})">এডিট</button>
+                            <button class="action-btn-sm delete" onclick="deleteMoneyTabMonth('${email}', ${idx})">ডিলিট</button>
+                        </td>
+                    </tr>`;
+                });
+            }
+            if(rowsHTML === '') {
+                rowsHTML = '<tr><td colspan="5" style="text-align: center;">কোন পেমেন্ট রেকর্ড নেই</td></tr>';
+            }
+            tbody.innerHTML = rowsHTML;
+        }
+
+        document.getElementById('adminClientMonthForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let email = document.getElementById('moneyTargetCustomer').value;
+            if(!email) return;
+
+            let client = clientsData[email];
+            let month = document.getElementById('adminMonthName').value;
+            let dharjo = parseFloat(document.getElementById('adminMonthDharjo').value);
+            let paid = parseFloat(document.getElementById('adminMonthPaid').value);
+
+            let existing = client.payments.find(p => p.month === month);
+            if(existing) {
+                existing.dharjo = dharjo;
+                existing.paid = paid;
+            } else {
+                client.payments.push({ month, dharjo, paid });
+            }
+
+            clientsData[email] = client;
+            saveToCloudAndLocal('clientsData', email, client);
+            alert('মাসিক হিসাব সফলভাবে আপডেট করা হয়েছে!');
+            document.getElementById('adminClientMonthForm').reset();
+            renderMoneyTabTable(email);
+            updateFinancialSummary();
+        });
+
+        function editMoneyTabMonth(email, index) {
+            let client = clientsData[email];
+            let item = client.payments[index];
+            document.getElementById('adminMonthName').value = item.month;
+            document.getElementById('adminMonthDharjo').value = item.dharjo;
+            document.getElementById('adminMonthPaid').value = item.paid;
+        }
+
+        function deleteMoneyTabMonth(email, index) {
+            if(confirm('এই মাসের হিসাব ডিলিট করতে চান?')) {
+                clientsData[email].payments.splice(index, 1);
+                let client = clientsData[email];
+                saveToCloudAndLocal('clientsData', email, client);
+                renderMoneyTabTable(email);
+                updateFinancialSummary();
+            }
+        }
+
+        function toggleDropdown(event, email) {
+            event.stopPropagation();
+            document.querySelectorAll('.dropdown-content').forEach(el => {
+                if(el.id !== 'dropdown-' + email) el.classList.remove('show');
+            });
+            document.getElementById('dropdown-' + email).classList.toggle('show');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn') && !event.target.matches('.fa-ellipsis-vertical')) {
+                document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+            }
+        }
+
+        function viewClientProfile(email) {
+            currentViewingEmail = email;
+            let c = clientsData[email];
+            if(!c) return;
+
+            document.getElementById('adminCustomerListSection').style.display = 'none';
+            document.getElementById('adminViewClientSection').style.display = 'block';
+
+            document.getElementById('viewClientName').innerText = c.name;
+            document.getElementById('viewClientId').innerText = c.idNo;
+            document.getElementById('viewClientPhone').innerText = c.phone;
+
+            document.getElementById('customerViewBkash').innerText = paymentSettings.bkash || "দেয়া হয়নি";
+            document.getElementById('customerViewNagad').innerText = paymentSettings.nagad || "দেয়া হয়নি";
+            document.getElementById('customerViewPaymentNotice').innerText = paymentSettings.notice || "";
+
+            let totalDharjo = 0, totalPaid = 0;
+            let monthRowsHTML = '';
+
+            if(c.payments && Array.isArray(c.payments)) {
+                c.payments.forEach((item, idx) => {
+                    let due = (item.dharjo || 0) - (item.paid || 0);
+                    if(due < 0) due = 0;
+                    totalDharjo += (item.dharjo || 0);
+                    totalPaid += (item.paid || 0);
+
+                    monthRowsHTML += `<tr>
+                        <td><b>${item.month}</b></td>
+                        <td>৳${item.dharjo}</td>
+                        <td style="color:#27ae60;">৳${item.paid}</td>
+                        <td style="color:#e74c3c;">৳${due}</td>
+                    </tr>`;
+                });
+            }
+
+            if(monthRowsHTML === '') {
+                monthRowsHTML = '<tr><td colspan="4" style="text-align: center;">কোন পেমেন্ট রেকর্ড নেই</td></tr>';
+            }
+
+            let totalDue = totalDharjo - totalPaid;
+            if(totalDue < 0) totalDue = 0;
+            let progress = totalDharjo > 0 ? Math.round((totalPaid / totalDharjo) * 100) : 0;
+
+            document.getElementById('viewClientTotalPaid').innerText = "৳ " + totalPaid;
+            document.getElementById('viewClientTotalDue').innerText = "৳ " + totalDue;
+            document.getElementById('viewClientProgressText').innerText = progress + "%";
+            document.getElementById('viewClientProgressBar').style.width = Math.min(progress, 100) + "%";
+            document.getElementById('viewClientMonthsTableBody').innerHTML = monthRowsHTML;
+        }
+
+        function closeClientView() {
+            currentViewingEmail = null;
+            document.getElementById('adminViewClientSection').style.display = 'none';
+            document.getElementById('adminCustomerListSection').style.display = 'block';
+        }
+
+        function confirmUser(email) {
+            let user = pendingUsers[email];
+            if(user) {
+                idCounter++;
+                user.idNo = "M-" + idCounter;
+                user.payments = [];
+                clientsData[email] = user;
+                delete pendingUsers[email];
+                
+                saveToCloudAndLocal('clientsData', email, user);
+                localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
+                localStorage.setItem('idCounter', idCounter);
+                loadSuperAdminData();
+            }
+        }
+
+        function rejectUser(email) {
+            delete pendingUsers[email];
+            localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
+            loadSuperAdminData();
+        }
+
+        function confirmPayment(index) {
+            let pay = pendingPayments[index];
+            let foundEmail = Object.keys(clientsData).find(email => clientsData[email].phone === pay.phone);
+            if(foundEmail) {
+                let client = clientsData[foundEmail];
+                let existingMonth = client.payments.find(p => p.month === pay.month);
+                if(existingMonth) { existingMonth.paid += pay.amount; }
+                else { client.payments.push({ month: pay.month, dharjo: 4000, paid: pay.amount }); }
+                
+                clientsData[foundEmail] = client; 
+                saveToCloudAndLocal('clientsData', foundEmail, client);
+            }
+            pendingPayments.splice(index, 1);
+            localStorage.setItem('pendingPayments', JSON.stringify(pendingPayments));
+            loadSuperAdminData();
+        }
+
+        function deleteCustomer(email) {
+            if(confirm('এই কাস্টমারকে ডিলিট করতে চান?')) {
+                delete clientsData[email];
+                localStorage.setItem('clientsData', JSON.stringify(clientsData));
+                if(window.db && window.FirestoreTools) {
+                    const { doc, deleteDoc } = window.FirestoreTools;
+                    deleteDoc(doc(window.db, "clientsData", email)).catch(err => console.log(err));
+                }
+                loadSuperAdminData();
+            }
+        }
+
+        function openEditCustomer(email) {
+            let c = clientsData[email];
+            if(!c) return;
+            document.getElementById('editOriginalEmail').value = email;
+            document.getElementById('editAccName').value = c.name;
+            document.getElementById('editAccPhone').value = c.phone;
+            document.getElementById('editAccEmail').value = c.email;
+            document.getElementById('editAccPass').value = c.password || "";
+            document.getElementById('editCustomerSection').style.display = 'block';
+        }
+
+        function cancelEditCustomer() {
+            document.getElementById('editCustomerSection').style.display = 'none';
+            document.getElementById('adminEditCustomerForm').reset();
+        }
+
+        document.getElementById('adminEditCustomerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let originalEmail = document.getElementById('editOriginalEmail').value;
+            let c = clientsData[originalEmail];
+            if(!c) return;
+
+            c.name = document.getElementById('editAccName').value.trim();
+            c.phone = document.getElementById('editAccPhone').value.trim();
+            let newEmail = document.getElementById('editAccEmail').value.trim().toLowerCase();
+            c.password = document.getElementById('editAccPass').value.trim();
+
+            if(newEmail !== originalEmail) {
+                clientsData[newEmail] = c;
+                delete clientsData[originalEmail];
+                saveToCloudAndLocal('clientsData', newEmail, c);
+                if(window.db && window.FirestoreTools) {
+                    const { doc, deleteDoc } = window.FirestoreTools;
+                    deleteDoc(doc(window.db, "clientsData", originalEmail)).catch(err => console.log(err));
+                }
+            } else {
+                saveToCloudAndLocal('clientsData', originalEmail, c);
+            }
+
+            alert('কাস্টমার তথ্য সফলভাবে আপডেট করা হয়েছে!');
+            cancelEditCustomer();
+            loadSuperAdminData();
+        });
+    </script>
+</body>
+</html>
